@@ -1,0 +1,23 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits PanelComponent
+
+<root class="hud-root">
+	<div class="hud-title">WAR OF DOTS</div>
+	<div class="hud-hint">WASD / edge-scroll · scroll to zoom · LMB select · drag box · RMB move</div>
+
+	@if ( SelectionController.IsDragging )
+	{
+		var x = System.Math.Min( SelectionController.DragStart.x,  SelectionController.DragCurrent.x );
+		var y = System.Math.Min( SelectionController.DragStart.y,  SelectionController.DragCurrent.y );
+		var w = System.Math.Abs( SelectionController.DragStart.x - SelectionController.DragCurrent.x );
+		var h = System.Math.Abs( SelectionController.DragStart.y - SelectionController.DragCurrent.y );
+		<div class="drag-box" style="left: @(x)px; top: @(y)px; width: @(w)px; height: @(h)px;"></div>
+	}
+</root>
+
+@code {
+	// Rebuild every frame while dragging so the box updates; otherwise stable.
+	protected override int BuildHash() =>
+		SelectionController.IsDragging ? (int)(Time.Now * 60f) : 0;
+}
