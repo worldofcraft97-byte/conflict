@@ -6,18 +6,42 @@
 	<div class="hud-title">WAR OF DOTS</div>
 	<div class="hud-hint">WASD / edge-scroll · scroll to zoom · LMB select · drag box · RMB move</div>
 
+	@* Units — CSS circles with health bar as a child div, so bar is always centred above *@
+	@{
+		var cam = Scene?.GetAllComponents<CameraComponent>().FirstOrDefault( c => c.IsMainCamera );
+		if ( cam != null )
+		{
+			foreach ( var unit in Scene.GetAllComponents<DotUnit>() )
+			{
+				var sp  = cam.PointToScreenPixels( unit.Transform.Position );
+				var pct = System.Math.Clamp( unit.Health / unit.MaxHealth * 100f, 0f, 100f );
+
+				var dotColor  = unit.IsSelected  ? "#ffffff"
+				              : unit.TeamId == 0 ? "#00e0ff"
+				              :                    "#ff5a1a";
+				var barColor  = pct > 60f ? "#00d250" : pct > 30f ? "#ffbe00" : "#ff1a46";
+
+				float r = 14f;
+				<div class="unit-dot" style="left:@(sp.x - r)px; top:@(sp.y - r)px; width:@(r*2)px; height:@(r*2)px; background:@dotColor;">
+					<div class="unit-hbar-bg">
+						<div class="unit-hbar-fill" style="width:@(pct)%; background:@barColor;"></div>
+					</div>
+				</div>
+			}
+		}
+	}
+
+	@* Drag-box selection rectangle *@
 	@if ( SelectionController.IsDragging )
 	{
 		var x = System.Math.Min( SelectionController.DragStart.x,  SelectionController.DragCurrent.x );
 		var y = System.Math.Min( SelectionController.DragStart.y,  SelectionController.DragCurrent.y );
 		var w = System.Math.Abs( SelectionController.DragStart.x - SelectionController.DragCurrent.x );
 		var h = System.Math.Abs( SelectionController.DragStart.y - SelectionController.DragCurrent.y );
-		<div class="drag-box" style="left: @(x)px; top: @(y)px; width: @(w)px; height: @(h)px;"></div>
+		<div class="drag-box" style="left:@(x)px; top:@(y)px; width:@(w)px; height:@(h)px;"></div>
 	}
 </root>
 
 @code {
-	// Rebuild every frame while dragging so the box updates; otherwise stable.
-	protected override int BuildHash() =>
-		SelectionController.IsDragging ? (int)(Time.Now * 60f) : 0;
+	protected override int BuildHash() => (int)(Time.Now * 60f);
 }

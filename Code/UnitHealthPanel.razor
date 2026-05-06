@@ -1,0 +1,18 @@
+@using Sandbox;
+@using Sandbox.UI;
+@inherits PanelComponent
+
+<root>
+	<div class="hb-bg">
+		<div class="hb-fill" style="width: @FillPct%;"></div>
+	</div>
+</root>
+
+@code {
+	public DotUnit Unit { get; set; }
+
+	float FillPct => Unit == null ? 100f
+	               : System.Math.Clamp( Unit.Health / Unit.MaxHealth * 100f, 0f, 100f );
+
+	protected override int BuildHash() => System.HashCode.Combine( Unit?.Health );
+}

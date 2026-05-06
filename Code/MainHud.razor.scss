@@ -28,6 +28,32 @@ root.hud-root {
 	letter-spacing: 1px;
 }
 
+/* ── Unit dots ───────────────────────────────────────────────────────── */
+
+.unit-dot {
+	position: absolute;
+	border-radius: 50%;
+	pointer-events: none;
+}
+
+/* Health bar sits just above the circle — child of .unit-dot so it's always centred */
+.unit-hbar-bg {
+	position: absolute;
+	top: -8px;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background-color: rgba(0, 0, 0, 0.7);
+	border-radius: 2px;
+}
+
+.unit-hbar-fill {
+	height: 100%;
+	border-radius: 2px;
+}
+
+/* ── Drag-box ────────────────────────────────────────────────────────── */
+
 .drag-box {
 	position: absolute;
 	border: 1px solid rgba(60, 220, 100, 0.9);
