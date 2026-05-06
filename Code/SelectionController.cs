@@ -116,26 +116,46 @@ public sealed class SelectionController : Component
 		var cam = Cam;
 		if ( cam == null ) return;
 
-		var corners = new[]
-		{
-			a, new Vector2( b.x, a.y ), b, new Vector2( a.x, b.y )
-		};
-
-		var world = corners.Select( c => GroundHit( cam.ScreenPixelToRay( c ) ) ).ToArray();
-
-		float minX = world.Min( p => p.x ), maxX = world.Max( p => p.x );
-		float minY = world.Min( p => p.y ), maxY = world.Max( p => p.y );
+		float minX = System.Math.Min( a.x, b.x );
+		float maxX = System.Math.Max( a.x, b.x );
+		float minY = System.Math.Min( a.y, b.y );
+		float maxY = System.Math.Max( a.y, b.y );
 
 		foreach ( var unit in AllUnits )
 		{
 			if ( unit.TeamId != 0 ) continue;
-			var p = unit.Transform.Position;
-			if ( p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY )
+
+			var sp = WorldToScreen( cam, unit.Transform.Position );
+			if ( sp.z < 0 ) continue; // behind camera
+
+			if ( sp.x >= minX && sp.x <= maxX && sp.y >= minY && sp.y <= maxY )
 			{
 				unit.IsSelected = true;
 				_selected.Add( unit );
 			}
 		}
+	}
+
+	// Manual world-to-screen projection using camera transform + FOV.
+	static Vector3 WorldToScreen( CameraComponent cam, Vector3 worldPos )
+	{
+		var rot     = cam.Transform.Rotation;
+		var diff    = worldPos - cam.Transform.Position;
+
+		float depth = Vector3.Dot( diff, rot.Forward );
+		if ( depth <= 0f ) return new Vector3( 0, 0, -1 );
+
+		float tanHalfFov = (float)System.Math.Tan( cam.FieldOfView * System.Math.PI / 360.0 );
+		float aspect     = Screen.Width / (float)Screen.Height;
+
+		float ndcX = Vector3.Dot( diff, rot.Right ) / ( depth * tanHalfFov * aspect );
+		float ndcY = Vector3.Dot( diff, rot.Up )    / ( depth * tanHalfFov );
+
+		return new Vector3(
+			( ndcX + 1f) * 0.5f * Screen.Width,
+			(1f - ndcY) * 0.5f * Screen.Height,
+			depth
+		);
 	}
 
 	static void Deselect()

@@ -7,13 +7,13 @@ public sealed class UnitSpawner : Component
 
 	protected override void OnStart()
 	{
-		// Team 0 (blue) — south half of map
+		// Team 0 (cyan, yours) — left side of map center
 		for ( int i = 0; i < 5; i++ )
-			Spawn( 0, new Vector3( Rnd( -80f, 80f ), Rnd( -180f, -100f ), GroundZ ) );
+			Spawn( 0, new Vector3( Rnd( -160f, -60f ), Rnd( 0f, 80f ), GroundZ ) );
 
-		// Team 1 (red) — north half of map
+		// Team 1 (orange, enemy) — right side of map center
 		for ( int i = 0; i < 5; i++ )
-			Spawn( 1, new Vector3( Rnd( -80f, 80f ), Rnd( 100f, 180f ), GroundZ ) );
+			Spawn( 1, new Vector3( Rnd( 60f, 160f ), Rnd( 0f, 80f ), GroundZ ) );
 	}
 
 	void Spawn( int teamId, Vector3 pos )

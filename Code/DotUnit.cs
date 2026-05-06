@@ -2,8 +2,8 @@ public sealed class DotUnit : Component
 {
 	public static readonly Color[] TeamColors =
 	{
-		new Color( 0.2f,  0.45f, 1.0f ),  // Team 0: blue
-		new Color( 1.0f,  0.2f,  0.2f ),  // Team 1: red
+		new Color( 0.0f,  0.9f,  1.0f ),  // Team 0 (yours): bright cyan
+		new Color( 1.0f,  0.35f, 0.1f ),  // Team 1 (enemy): orange
 	};
 
 	[Property] public int   TeamId    { get; set; } = 0;
@@ -13,8 +13,8 @@ public sealed class DotUnit : Component
 
 	public Vector3? MoveTarget { get; set; }
 
-	bool        _isSelected;
-	GameObject  _ring;
+	bool          _isSelected;
+	ModelRenderer _renderer;
 
 	public bool IsSelected
 	{
@@ -22,30 +22,18 @@ public sealed class DotUnit : Component
 		set
 		{
 			_isSelected = value;
-			if ( _ring != null ) _ring.Enabled = value;
+			if ( _renderer != null )
+				_renderer.Tint = value ? Color.White : TeamColors[TeamId];
 		}
 	}
 
 	protected override void OnStart()
 	{
-		// Flat selection ring — sibling object (not child) so parent scale doesn't affect it
-		_ring = Scene.CreateObject();
-		_ring.Name    = "SelectionRing";
-		_ring.Enabled = false;
-		_ring.Transform.Scale = new Vector3( 0.12f, 0.12f, 0.01f );
-
-		var r = _ring.Components.Create<ModelRenderer>();
-		r.Model = Model.Load( "models/dev/plane.vmdl" );
-		r.Tint  = new Color( 0.25f, 1f, 0.4f, 0.85f );
+		_renderer = Components.Get<ModelRenderer>();
 	}
 
 	protected override void OnUpdate()
 	{
-		// Keep ring glued under unit
-		if ( _ring != null && _ring.Enabled )
-			_ring.Transform.Position = Transform.Position.WithZ( 0.3f );
-
-		// Steering toward move target
 		if ( !MoveTarget.HasValue ) return;
 
 		var flat = MoveTarget.Value.WithZ( Transform.Position.z );
@@ -58,10 +46,5 @@ public sealed class DotUnit : Component
 		}
 
 		Transform.Position += diff.Normal * MoveSpeed * Time.Delta;
-	}
-
-	protected override void OnDestroy()
-	{
-		_ring?.Destroy();
 	}
 }
